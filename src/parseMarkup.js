@@ -16,7 +16,7 @@ var winston = require('winston');
 var testNodeTypes = {
     heading: /^[\=]+\s?([^\=]+)\s?[\=]+?$/,
     whiteline: /^$|^\s+$/,
-    list: /([\*\-]+\s+|[0-9A-Za-z\.]+\.\s+)/
+    list: /^([\*\-]+\s+|[0-9A-Za-z\.]+\.\s+)/
 };
 
 
