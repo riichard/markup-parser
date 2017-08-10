@@ -10,7 +10,8 @@ var util = require('util');
 var htmlparser = require('htmlparser');
 var rfr = require('rfr');
 var parser = {
-    toMarkup: rfr('src/toMarkup')
+    toMarkup: rfr('src/toMarkup'),
+    parseMarkup: rfr('src/parseMarkup')
 };
 
 
@@ -51,7 +52,16 @@ if(options.fromHtml) {
         var markup = parser.toMarkup(data);
         console.log(markup);
     });
-
 }
 
+if(options.toHtml) {
+    fs.readFile(options.toHtml,'utf8', function(err, data) {
+        if(err) {
+            return console.log(err);
+        }
+        var data = parser.parseMarkup(data);
+        //var markup = parser.toHtml(data);
+        //console.log(markup);
+    });
+}
 
