@@ -1,7 +1,6 @@
 var util = require('util');
 
 function toHtml(nodes, indentSize) {
-    console.log(util.inspect(nodes, false, null));
     if(!nodes || nodes.length === 0) return '';
 
     indentSize = indentSize || 0;
@@ -28,8 +27,21 @@ function toHtml(nodes, indentSize) {
 }
 
 function attributesToString(attributes) {
-    // TODO
-    return '';
+    var out = '';
+    if(!attributes) return out;
+
+    var keys = Object.keys(attributes);
+    var key;
+
+    for(var i=0;i<keys.length;i++) {
+        key = keys[i];
+        out += ' '
+            + key
+            + '="'
+            + attributes[key].replace('"', '\\"')
+            + '"';
+    }
+    return out;
 }
 
 function createIndent(indentSize) {

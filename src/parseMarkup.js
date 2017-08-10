@@ -62,7 +62,6 @@ function toArrayOfSiblings(nodes) {
     }
 
     var type = lineToType(nodes[0]);
-    console.log('typeOfFirstNode', type);
     for(var i=0; i < nodes.length; ) {
         if(type === 'heading') var siblingsTo = ['heading', 'whitespace'];
         if(type === 'list') var siblingsTo = ['whitespace'];
