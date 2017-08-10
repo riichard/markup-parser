@@ -39,46 +39,6 @@ function textToLines(text) {
     return text.split(/\r?\n/);
 }
 
-// Returns [$concatinatorType, array of arrays of nodes]
-// [
-//      h2,
-//       [
-//            [
-//                '== Fix a bug',
-//                '* understand bug'
-//            ],
-//            [
-//                '== something else',
-//                '* understand bug'
-//            ]
-//       ]
-// ]
-function toArrayOfSiblings(nodes) {
-    var out = [];
-
-    // TODO Don't know if this is possible yet. Just in case
-    if(nodes.length === 0) {
-        return [ '', []];
-    }
-
-    var type = lineToType(nodes[0]);
-    for(var i=0; i < nodes.length; ) {
-        if(type === 'heading') var siblingsTo = ['heading', 'whitespace'];
-        if(type === 'list') var siblingsTo = ['whitespace'];
-
-        var indexToNextSibling = indexOfByTypes(nodes, siblingsTo, i+1);
-        winston.debug(type, indexToNextSibling, nodes[i]);
-
-        if(indexToNextSibling === -1) {
-            indexToNextSibling = nodes.length;
-        }
-
-        out.push(nodes.slice(i, indexToNextSibling));
-        i = indexToNextSibling;
-    }
-    return out;
-}
-
 // Returns the index-of the item in nodes to one of the types in typesTo.
 // Returns -1 if the type can't be found.
 // in:
@@ -132,8 +92,6 @@ function nodeToText(line){
 
 function parseMarkup(text) {
     var lines = textToLines(text);
-    //console.log(toArrayOfSiblings(lines));
-    //console.log(toArrayOfSiblings(['* D', '* E', '* F', '' ]));
     return linesToNodes(lines);
 }
 
@@ -185,13 +143,16 @@ function parseMarkup(text) {
 //  }
 //  ...
 //  ]
-function linesToNodes(lines) {
+function linesToNodes(lines, lineOffset) {
+    lineOffset = lineOffset || 0;
+
     var nodes = [];
     winston.debug(lines);
     for(var indexToNextLine = 0; indexToNextLine < lines.length; ){
         var line = lines[indexToNextLine];
         var type = lineToType(line);
         var currentIndex = indexToNextLine;
+        var currentLineIndex = lineOffset + currentIndex;
         winston.debug('parsing node', currentIndex, line);
 
         if(type === 'heading') {
@@ -219,12 +180,15 @@ function linesToNodes(lines) {
                     {
                         type: 'tag',
                         name: 'h2',
+                        attributes: {
+                            line: (currentLineIndex++)
+                        },
                         children: [{
                             type: 'text',
                             data: nodeToText(line)
                         }]
                     }
-                ].concat(linesToNodes(linesToNextSection))
+                ].concat(linesToNodes(linesToNextSection, currentLineIndex))
             };
         }
         else if(type === 'list') {
@@ -234,10 +198,13 @@ function linesToNodes(lines) {
                 name: 'ul',
                 children: lines
                     .filter(line => !/(^$|^\s$)$/.test(line)) // Remove whitelines
-                    .map(function(line) {
+                    .map(function(line, listIndex) {
                         return {
                             type: 'tag',
                             name: 'li',
+                            attributes: {
+                                line: (currentLineIndex++)
+                            },
                             children: [{
                                 type: 'text',
                                 data: nodeToText(line)
@@ -247,7 +214,19 @@ function linesToNodes(lines) {
             };
         }
         else { // TODO ignore line?
+            var node = {
+                type: 'tag',
+                name: 'p',
+                attributes: {
+                    line: currentLineIndex
+                },
+                children: [{
+                    type: 'text',
+                    data: line
+                }]
+            };
             indexToNextLine++;
+
         }
         nodes.push(node);
     }
@@ -255,5 +234,53 @@ function linesToNodes(lines) {
     return nodes;
 }
 
+/* This is conceptual code. I think it'd be more versatile than the complex if
+ * statement loop. But requires more editing/work
+// Returns [$concatinatorType, array of arrays of nodes]
+// [
+//      h2,
+//       [
+//            [
+//                '== Fix a bug',
+//                '* understand bug'
+//            ],
+//            [
+//                '== something else',
+//                '* understand bug'
+//            ]
+//       ]
+// ]
+function toArrayOfSiblings(nodes, diffIndex) {
+    var out = [];
 
-module.exports = parseMarkup;
+    // TODO Don't know if this is possible yet. Just in case
+    if(nodes.length === 0) {
+        return [ '', []];
+    }
+
+    var type = lineToType(nodes[0]);
+    for(var i=0; i < nodes.length; ) {
+        if(type === 'heading') var siblingsTo = ['heading', 'whitespace'];
+        if(type === 'list') var siblingsTo = ['whitespace'];
+
+        var indexToNextSibling = indexOfByTypes(nodes, siblingsTo, i+1);
+        winston.debug(type, indexToNextSibling, nodes[i]);
+
+        if(indexToNextSibling === -1) {
+            indexToNextSibling = nodes.length;
+        }
+
+        out.push(nodes.slice(i, indexToNextSibling));
+        i = indexToNextSibling;
+    }
+    return [type, diffIndex, out];
+}
+
+function arrayOfSiblingsToNodes(arrayOfSiblings) {
+} end of conceptual code */
+
+
+module.exports = {
+    linesToNodes,
+    parseMarkup,
+};
