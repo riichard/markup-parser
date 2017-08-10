@@ -39,71 +39,35 @@ function textToLines(text) {
     return text.split(/\r?\n/);
 }
 
-// Input: Raw text nodes
-// Output: Data node
-// Example:
-// in: [
-//      '== Fix a bug ==',
-//      '* Understand bug',
-//      '* Write code',
-//      ''
-//      '== Another thing',
-//      '* Understand bug',
-//      '* Write code',
-//      ''
-// ]
-// out: [
-//      {
-//          type: 'tag',
-//          name: 'section',
-//          children: [
-//            {
-//                type: 'tag',
-//                data: 'Fix a bug',
-//                name: 'h2'
-//                children: [
-//                    {
-//                        type: 'tag',
-//                        name: 'ol',
-//                        children: [
-//                            {
-//                                type: 'tag',
-//                                name: 'li',
-//                                children: [
-//                                    {
-//                                        type: 'text',
-//                                        data: 'Understand bug'
-//                                    }
-//                                    ...
-//                                ]
-//                            }
-//                            ...
-//                        ]
-//                    }
-//                    ...
-//                ]
-//            }
-//       ]
-//  }
-//  ...
-//  ]
-
-// Returns array of arrays of nodes
+// Returns [$concatinatorType, array of arrays of nodes]
 // [
-//      [
-//          '== Fix a bug',
-//          '* understand bug'
-//      ],
-//      [
-//          '== something else',
-//          '* understand bug'
-//      ]
-// ], $concatinatorType
-function toNodesOfSiblings(nodes) {
+//      h2,
+//       [
+//            [
+//                '== Fix a bug',
+//                '* understand bug'
+//            ],
+//            [
+//                '== something else',
+//                '* understand bug'
+//            ]
+//       ]
+// ]
+function toArrayOfSiblings(nodes) {
     var out = [];
+
+    // TODO Don't know if this is possible yet. Just in case
+    if(nodes.length === 0) {
+        return [ '', []];
+    }
+
+    var type = lineToType(nodes[0]);
+    console.log('typeOfFirstNode', type);
     for(var i=0; i < nodes.length; ) {
-        var type = lineToType(nodes[i]);
-        var indexToNextSibling = indexToNodeByTypes(nodes, [type], i+1);
+        if(type === 'heading') var siblingsTo = ['heading', 'whitespace'];
+        if(type === 'list') var siblingsTo = ['whitespace'];
+
+        var indexToNextSibling = indexOfByTypes(nodes, siblingsTo, i+1);
         winston.debug(type, indexToNextSibling, nodes[i]);
 
         if(indexToNextSibling === -1) {
@@ -154,22 +118,74 @@ function lineToType(node) {
     return 'other';
 }
 
+// Strip markup from a line
 function nodeToText(line){
-    // Strip markup from raw node
-    return line;
+    var type = lineToType(line);
+    switch(type){
+        case 'heading':
+            return line.replace(/^[\=]+\s?([^\=]+)\s?[\=]+?$/, '$1');
+        case 'list':
+            return line.replace(/^([\*\-]+\s+|[0-9A-Za-z\.]+\.\s+)/, '');
+        default:
+            return line;
+    }
 }
 
-// Input: text
-// Output: Data nodes
-// Example:
-// in:
-// TODO
 function parseMarkup(text) {
     var lines = textToLines(text);
-    //console.log(toNodesOfSiblings(lines));
+    //console.log(toArrayOfSiblings(lines));
+    //console.log(toArrayOfSiblings(['* D', '* E', '* F', '' ]));
     return linesToNodes(lines);
 }
 
+// Input: Raw text nodes
+// Output: Data node
+// Example:
+// in: [
+//      '== Fix a bug ==',
+//      '* Understand bug',
+//      '* Write code',
+//      ''
+//      '== Another thing',
+//      '* Understand bug',
+//      '* Write code',
+//      ''
+// ]
+// out: [
+//      {
+//          type: 'tag',
+//          name: 'section',
+//          children: [
+//            {
+//                type: 'tag',
+//                data: 'Fix a bug',
+//                name: 'h2'
+//                children: [
+//                    {
+//                        type: 'tag',
+//                        name: 'ol',
+//                        children: [
+//                            {
+//                                type: 'tag',
+//                                name: 'li',
+//                                children: [
+//                                    {
+//                                        type: 'text',
+//                                        data: 'Understand bug'
+//                                    }
+//                                    ...
+//                                ]
+//                            }
+//                            ...
+//                        ]
+//                    }
+//                    ...
+//                ]
+//            }
+//       ]
+//  }
+//  ...
+//  ]
 function linesToNodes(lines) {
     var nodes = [];
     winston.debug(lines);
