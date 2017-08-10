@@ -60,6 +60,7 @@ if(options.toHtml) {
             return console.log(err);
         }
         var data = parser.parseMarkup(data);
+        console.log(util.inspect(data, false, null));
         //var markup = parser.toHtml(data);
         //console.log(markup);
     });

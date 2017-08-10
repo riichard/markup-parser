@@ -1,4 +1,5 @@
-
+var util = require('util');
+var winston = require('winston');
 
 // Parse markup
 //
@@ -14,7 +15,7 @@
 
 var testNodeTypes = {
     heading: /^[\=]+\s?([^\=]+)\s?[\=]+?$/,
-    whiteline: /^\s+$/,
+    whiteline: /^$|^\s+$/,
     list: /([\*\-]+\s+|[0-9A-Za-z\.]+\.\s+)/
 };
 
@@ -34,7 +35,7 @@ var testNodeTypes = {
 //      '* Write code',
 //      ''
 // ]
-function textToRawNodes(text) {
+function textToLines(text) {
     return text.split(/\r?\n/);
 }
 
@@ -97,14 +98,13 @@ function textToRawNodes(text) {
 //          '== something else',
 //          '* understand bug'
 //      ]
-// ],
+// ], $concatinatorType
 function toNodesOfSiblings(nodes) {
     var out = [];
-    for(var i=0; i < nodes.length; i++) {
-        var type = nodeToType(nodes[i]);
+    for(var i=0; i < nodes.length; ) {
+        var type = lineToType(nodes[i]);
         var indexToNextSibling = indexToNodeByTypes(nodes, [type], i+1);
-        console.log(type, indexToNextSibling, nodes[i]);
-
+        winston.debug(type, indexToNextSibling, nodes[i]);
 
         if(indexToNextSibling === -1) {
             indexToNextSibling = nodes.length;
@@ -128,8 +128,8 @@ function toNodesOfSiblings(nodes) {
 // ], ['heading', 'whitespace']
 // out: 3
 function indexToNodeByTypes(nodes, typesTo, offset) {
-    for(var i= offset || 0; i < nodes.length; i++) {
-        var type = nodeToType(nodes[i]);
+    for(var i = offset || 0; i < nodes.length; i++) {
+        var type = lineToType(nodes[i]);
         if(typesTo.indexOf(type) !== -1) {
             return i;
         }
@@ -142,7 +142,7 @@ function indexToNodeByTypes(nodes, typesTo, offset) {
 // == fix a bug ==
 // out:
 // 'heading'
-function nodeToType(node) {
+function lineToType(node) {
     var types = Object.keys(testNodeTypes);
     for(var i=0; i<types.length; i++) {
         var type = types[i];
@@ -154,6 +154,10 @@ function nodeToType(node) {
     return 'other';
 }
 
+function nodeToText(line){
+    // Strip markup from raw node
+    return line;
+}
 
 // Input: text
 // Output: Data nodes
@@ -161,15 +165,79 @@ function nodeToType(node) {
 // in:
 // TODO
 function parseMarkup(text) {
-    var nodes = textToRawNodes(text);
-    var nodes  = toNodesOfSiblings(nodes);
-    console.log(nodes);
+    var lines = textToLines(text);
+    //console.log(toNodesOfSiblings(lines));
+    return linesToNodes(lines);
+}
 
-    for(var i = 0; i < nodes.length; i++) {
-        var type = nodeToType(nodes[i]);
+function linesToNodes(lines) {
+    var nodes = [];
+    winston.debug(lines);
+    for(var indexToNextLine = 0; indexToNextLine < lines.length; ){
+        var line = lines[indexToNextLine];
+        var type = lineToType(line);
+        var currentIndex = indexToNextLine;
+        winston.debug('parsing node', currentIndex, line);
 
+        if(type === 'heading') {
+            // Set index for next heading. All nodes in this section will be added
+            // to the section tag
+            var indexToNextHeading = indexToNodeByTypes(lines, ['heading'], indexToNextLine + 1 );
+            winston.debug('index to next heading', indexToNextHeading);
 
+            // If heading can't be found. Finish the loop
+            if(indexToNextHeading === -1) {
+                indexToNextLine = lines.length;
+            }
+            else {
+                indexToNextLine = indexToNextHeading;
+            }
+
+            var linesToNextSection = lines.slice(currentIndex + 1, indexToNextLine);
+            winston.debug('linesToNextSection', linesToNextSection);
+
+            winston.debug('indexToNextLine', indexToNextLine);
+            var node = {
+                type: 'tag',
+                name: 'section',
+                children: [
+                    {
+                        type: 'tag',
+                        name: 'h2',
+                        children: [{
+                            type: 'text',
+                            data: nodeToText(line)
+                        }]
+                    }
+                ].concat(linesToNodes(linesToNextSection))
+            };
+        }
+        else if(type === 'list') {
+            indexToNextLine = lines.length;
+            var node = {
+                type: 'tag',
+                name: 'ul',
+                children: lines
+                    .filter(line => !/(^$|^\s$)$/.test(line)) // Remove whitelines
+                    .map(function(line) {
+                        return {
+                            type: 'tag',
+                            name: 'li',
+                            children: [{
+                                type: 'text',
+                                data: nodeToText(line)
+                            }]
+                        }
+                    })
+            };
+        }
+        else { // TODO ignore line?
+            indexToNextLine++;
+        }
+        nodes.push(node);
     }
+    winston.debug(util.inspect(nodes, false, null));
+    return nodes;
 }
 
 
