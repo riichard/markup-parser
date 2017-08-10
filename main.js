@@ -1,25 +1,52 @@
 // TODO
 //
 //
-// - data structure parsed content
-// - CLI arguments parsing, something with process.ENV
-//
-//
-// data format
-// - adaptable for nested items
-// - multiple blocks / sections
-// - adaptable for other pieces of markup, maybe consist with the nodes
-// structure of HTML how it includes bold/text nodes
-// - ability to pull diffs, With a difficult object structure, it might be hard to
-// compare nodes with nodejs, but I can use JSON.stringify and maybe find
-// another library to compare them
-// - convert to HTML. So it might be best to work with a format that is used by
-// an HTML parser. And it will assure us that all features of HTML are
-// supported, and that we can not have any unforeseen limitations to our data
-// structure
+// [x] data structure parsed content
+// [x] CLI arguments parsing, something with process.ENV
+
+var fs = require('fs');
+var cli = require('cli');
+var util = require('util');
+var htmlparser = require('htmlparser');
+
+var options = cli.parse({
+    toHtml: ['m', 'Markup file to convert to HTML', 'file', false],
+    fromHtml: ['html', 'HTML file to convert to Markup', 'file', false]
+});
+
+console.log(options);
+
+// In: HTML
+// Out: err, Data structure
+// TODO add parsing stream compatibility
+function parseHtml(html, callback) {
+    var handler = new htmlparser.DefaultHandler(function(error, dom) {
+        if(error) {
+            return console.error(error);
+        }
+    });
+
+    var parser = new htmlparser.Parser(handler);
+    parser.parseComplete(html);
+    console.log(util.inspect(handler.dom, false, null));
+}
+
+// In: Markup
+// Out: err, Data structure
+function parseMarkup(markup, callback) {
+}
 
 
 
+if(options.fromHtml) {
+    fs.readFile(options.fromHtml,'utf8', function(err, data) {
+        if(err) {
+            return console.log(err);
+        }
+        var data = parseHtml(data);
+        console.log(data);
+    });
 
+}
 
 
