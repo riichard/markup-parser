@@ -13,40 +13,13 @@
 // - ability to pull diffs, With a difficult object structure, it might be hard to
 // compare nodes with nodejs, but I can use JSON.stringify and maybe find
 // another library to compare them
-//
-//
-// [
-//      ['section',
-//          ['heading', 'Fix a bug' ]
-//          ['list',
-//              ['listItem', [
-//                  ['text', 'Verify fix in beta cluster']
-//              ],
-//              ['listItem', [
-//                  ['text', 'Verify fix in beta cluster']
-//              ]
-//              ['listItem', [
-//                  ['text', 'Something more']
-//              ]
-//          ],
-//      ],
-//      ['section', [
-//          ['heading', 'WIP: QA' ]
-//          ['list', [
-//              ['listItem', [
-//                  ['text', 'Verify fix in beta cluster']
-//              ],
-//              ['listItem', [
-//                  ['text', 'Verify fix in beta cluster']
-//              ]
-//              ['listItem', [
-//                  ['text', 'Something more']
-//              ]
-//          ],
-//      ]]
-// ]
-//
-//
+// - convert to HTML. So it might be best to work with a format that is used by
+// an HTML parser. And it will assure us that all features of HTML are
+// supported, and that we can not have any unforeseen limitations to our data
+// structure
+
+
+
 
 
 
