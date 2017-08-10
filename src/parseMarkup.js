@@ -127,7 +127,7 @@ function toNodesOfSiblings(nodes) {
 //      '== another thing'
 // ], ['heading', 'whitespace']
 // out: 3
-function indexToNodeByTypes(nodes, typesTo, offset) {
+function indexOfByTypes(nodes, typesTo, offset) {
     for(var i = offset || 0; i < nodes.length; i++) {
         var type = lineToType(nodes[i]);
         if(typesTo.indexOf(type) !== -1) {
@@ -182,7 +182,7 @@ function linesToNodes(lines) {
         if(type === 'heading') {
             // Set index for next heading. All nodes in this section will be added
             // to the section tag
-            var indexToNextHeading = indexToNodeByTypes(lines, ['heading'], indexToNextLine + 1 );
+            var indexToNextHeading = indexOfByTypes(lines, ['heading'], indexToNextLine + 1 );
             winston.debug('index to next heading', indexToNextHeading);
 
             // If heading can't be found. Finish the loop

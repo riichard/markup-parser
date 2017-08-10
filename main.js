@@ -11,6 +11,7 @@ var htmlparser = require('htmlparser');
 var rfr = require('rfr');
 var parser = {
     toMarkup: rfr('src/toMarkup'),
+    toHtml: rfr('src/toHtml'),
     parseMarkup: rfr('src/parseMarkup')
 };
 
@@ -61,8 +62,8 @@ if(options.toHtml) {
         }
         var data = parser.parseMarkup(data);
         console.log(util.inspect(data, false, null));
-        //var markup = parser.toHtml(data);
-        //console.log(markup);
+        var html = parser.toHtml(data);
+        console.log(html);
     });
 }
 
