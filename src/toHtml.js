@@ -38,7 +38,7 @@ function attributesToString(attributes) {
         out += ' '
             + key
             + '="'
-            + attributes[key].replace('"', '\\"')
+            + (''+attributes[key]).replace('"', '\\"')
             + '"';
     }
     return out;
