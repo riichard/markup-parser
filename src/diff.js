@@ -16,12 +16,20 @@ function applyDiff(diff, nodes) {
             { type: 'text', data: 'We know nothing' }
         ]
     });
+
+    //var mergingDom = parseMarkup([
+        //'* learn a new language',
+        //'',
+        //'== steps to world peace ==',
+        //'* make finding and sharing information easy accessible',
+        //'* inspire curiosity to keep on learning',
+        //'* discover that listening is the only way forward'
+    //]);
+    //mergeAtIndex(3, mergingDom);
 }
 
 function replaceNodeText(dom, index, newText) {
     var node = findNode(dom, index);
-    console.log('node', index, node);
-
     // TODO This assumes that nodes can only have one text child.
     node.children = [{
         type: 'text',
@@ -37,13 +45,12 @@ function deleteNode(dom, index) {
 
 // Adds node at $index
 function addNodeAtIndex(dom, index, newNode) {
-    console.log('adding nodes');
     var node = findNode(dom, index);
-    console.log(node);
     node.siblings.splice(node.indexToParent, 0, newNode);
-    console.log(util.inspect(dom, false, null));
 }
 
+//function mergeDom(dom, index, newDom) {
+//}
 
 // In: Dom
 // In: Index
@@ -54,8 +61,8 @@ function findNode(dom, index) {
         var node = dom[i];
 
         // Setting data for book-keeping
-        node.siblings = dom;
-        node.indexToParent = i;
+        if(!node.siblings) node.siblings = dom;
+        if(!node.indexToParent) node.indexToParent = i;
 
         var currentIndex = node.attribs ? node.attribs.line : -1;
 
