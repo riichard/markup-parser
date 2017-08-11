@@ -15,6 +15,15 @@ var testLineTypes = {
     heading: /^[\=]+\s?([^\=]+)\s?[\=]+?$/,
     whiteline: /^$|^\s+$/,
     list: /^([\*\-]+\s+|[0-9A-Za-z\.]+\.\s+)/
+
+    // Code for conceptual other parser
+    //h1: /^[\=]{1}\s?([^\=]+)\s?[\=]{1}?$/,
+    //h2: /^[\=]{2}\s?([^\=]+)\s?[\=]{2}?$/,
+    //h3: /^[\=]{3}\s?([^\=]+)\s?[\=]{3}?$/,
+    //liO: /^[0-9A-Za-z\.]+\.\s+/,
+    //liU1: /^[\*\-]{1}\s+/,
+    //liU2: /^[\*\-]{2}\s+/,
+    //liU3: /^[\*\-]{3}\s+/
 };
 
 
@@ -94,7 +103,11 @@ function nodeToText(line){
 
 function parseMarkup(text) {
     var lines = textToLines(text);
-    //console.log(toArrayOfSiblings);
+
+    // TODO code for testing conceptual parser
+    //console.log(toArrayOfSiblings(lines));
+    //console.log(toArrayOfSiblings(['* D', '* E', '* F', '' ]));
+
     return linesToNodes(lines);
 }
 
@@ -255,7 +268,7 @@ function linesToNodes(lines, lineOffset) {
 //            ]
 //       ]
 // ]
-function toArrayOfSiblings(nodes, diffIndex) {
+function toArrayOfSiblings(nodes) {
     var out = [];
 
     // TODO Don't know if this is possible yet. Just in case
@@ -276,7 +289,7 @@ function toArrayOfSiblings(nodes, diffIndex) {
         out.push(nodes.slice(i, indexToNextSibling));
         i = indexToNextSibling;
     }
-    return [type, diffIndex, out];
+    return [type, out];
 }
 
 function arrayOfSiblingsToNodes(arrayOfSiblings) {
