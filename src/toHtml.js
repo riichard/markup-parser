@@ -13,7 +13,7 @@ function toHtml(nodes, indentSize) {
         if(node.type === 'tag') {
             return indent + '<'
                 + node.name
-                + attributesToString(node.attributes)
+                + attributesToString(node.attribs)
                 + '>\n'
                 + toHtml(node.children, indentSize + 1)
                 + '\n'

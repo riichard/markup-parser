@@ -198,7 +198,7 @@ function linesToNodes(lines, lineOffset) {
                     {
                         type: 'tag',
                         name: 'h2',
-                        attributes: {
+                        attribs: {
                             line: (currentLineIndex++)
                         },
                         children: [{
@@ -220,7 +220,7 @@ function linesToNodes(lines, lineOffset) {
                         return {
                             type: 'tag',
                             name: 'li',
-                            attributes: {
+                            attribs: {
                                 line: (currentLineIndex++)
                             },
                             children: [{
@@ -235,7 +235,7 @@ function linesToNodes(lines, lineOffset) {
             var node = {
                 type: 'tag',
                 name: 'p',
-                attributes: {
+                attribs: {
                     line: currentLineIndex
                 },
                 children: [{
