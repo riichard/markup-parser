@@ -23,7 +23,11 @@ node main.js --help
 
 - [x] Commit current state
 - [x] Check variable names and code comments
-- [ ] Add support for replacing single line's content
-- [ ] Look into PEG based markup parsing, or other alternatives
-- [ ] Create readme
+- [x] Add support for replacing single line's content
+- [x] Add support for deleting nodes
+- [x] Add support for adding nodes at a specific index
+- [ ] Add support for adding a nodes-list to a dom. And detect which item
+    should be put where (li in ul), (new section appended to below)
+- [ ] Look into other parsing algorithms, that allow more complex grammars
+- [-] Create readme
 - [ ] Add unit tests
