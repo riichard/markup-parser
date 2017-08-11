@@ -21,8 +21,8 @@ node main.js --help
 
 ### Todo
 
-- [ ] Commit current state
-- [ ] Check variable names and code comments
+- [x] Commit current state
+- [x] Check variable names and code comments
 - [ ] Add support for replacing single line's content
 - [ ] Look into PEG based markup parsing, or other alternatives
 - [ ] Create readme
