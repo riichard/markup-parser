@@ -3,8 +3,8 @@ var htmlparser = require('htmlparser');
 
 
 // In: HTML
-// Out: err, Data structure
-// TODO add parsing stream compatibility
+// Out: Data structure
+// TODO add parsing file stream compatibility, htmlparser supports it.
 function parseHtml(html, callback) {
     var handler = new htmlparser.DefaultHandler(function(error, dom) {
         if(error) {
@@ -17,6 +17,11 @@ function parseHtml(html, callback) {
     return cleanNodes(handler.dom);
 }
 
+
+// Cleans parsed nodes
+// - Converts line attributes to integers
+// - Removes whitespace from text nodes
+// - Recursively does the same for it's children nodes
 function cleanNodes(nodes) {
     return nodes.map(node => {
         if(node.attribs && node.attribs.line) {
