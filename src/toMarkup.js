@@ -8,6 +8,8 @@ var formatting = {
     // TODO ol - better support for numbered items. Perhaps move children
     // concatenation to each formatting function. These numbers will bug if a non-li
     // node is part of the list
+    // TODO this system has a bug in case another element is in between the
+    // UL/OL and LI tag
     li: (node, parent, i) => [(parent.name === 'ol' ? (i+1)+'.' : '*') + ' ', '\n'],
 
     // TODO ol/li: add support for nested items
