@@ -1,9 +1,3 @@
-// TODO
-//
-//
-// [x] data structure parsed content
-// [x] CLI arguments parsing, something with process.ENV
-
 var fs = require('fs');
 var cli = require('cli');
 var util = require('util');
