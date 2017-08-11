@@ -34,8 +34,9 @@ function cleanNodes(nodes) {
             node.children = cleanNodes(node.children);
         }
         return node;
-    });
-    return nodes;
+    })
+    // Filter empty text nodes
+    .filter(node => !(node.type === 'text' && node.data === ''));
 }
 
 
