@@ -3,17 +3,15 @@ var winston = require('winston');
 
 // Parse markup
 //
-//
-
-// - split lines into separate rawnodes
-// - split into sections by heading
-// - convert rawnodes to data nodes
-// - some nodes will have children in the next nodes. Each time we parse a node, we check which
-// next nodes are children nodes, lists can be recursive. So add functionality
-// to that later. Step by step.
+// - Parse text to lines
+// - Detect blocks of lines, and either put them in a <section> or <ul> or
+// something else in the future, if not defined, put in a <p>
+//      - Detecting blocks go by checking the first line, and forming a block
+//      of all lines that aren't different than the type of the first line
+// - Maintain line numbers of parsed markup in the attributes
 
 
-var testNodeTypes = {
+var testLineTypes = {
     heading: /^[\=]+\s?([^\=]+)\s?[\=]+?$/,
     whiteline: /^$|^\s+$/,
     list: /^([\*\-]+\s+|[0-9A-Za-z\.]+\.\s+)/
@@ -60,17 +58,17 @@ function indexOfByTypes(nodes, typesTo, offset) {
     return -1;
 }
 
-// Returns type of node
+// Returns type of line
 // in:
 // == fix a bug ==
 // out:
 // 'heading'
-function lineToType(node) {
-    var types = Object.keys(testNodeTypes);
+function lineToType(line) {
+    var types = Object.keys(testLineTypes);
     for(var i=0; i<types.length; i++) {
         var type = types[i];
-        var typePattern = testNodeTypes[type];
-        if(typePattern.test(node)) {
+        var typePattern = testLineTypes[type];
+        if(typePattern.test(line)) {
             return type;
         }
     }
@@ -78,6 +76,10 @@ function lineToType(node) {
 }
 
 // Strip markup from a line
+// In:
+// == fix a bug ==
+// out:
+// 'fix a bug'
 function nodeToText(line){
     var type = lineToType(line);
     switch(type){
@@ -92,11 +94,14 @@ function nodeToText(line){
 
 function parseMarkup(text) {
     var lines = textToLines(text);
+    //console.log(toArrayOfSiblings);
     return linesToNodes(lines);
 }
 
-// Input: Raw text nodes
+// Input: array of lines
 // Output: Data node
+// lineOffset can be used to make the attributed line number start at a
+// different number
 // Example:
 // in: [
 //      '== Fix a bug ==',
@@ -213,7 +218,7 @@ function linesToNodes(lines, lineOffset) {
                     })
             };
         }
-        else { // TODO ignore line?
+        else {
             var node = {
                 type: 'tag',
                 name: 'p',
@@ -235,7 +240,7 @@ function linesToNodes(lines, lineOffset) {
 }
 
 /* This is conceptual code. I think it'd be more versatile than the complex if
- * statement loop. But requires more editing/work
+ * statement loop. But requires more editing/work*/
 // Returns [$concatinatorType, array of arrays of nodes]
 // [
 //      h2,
@@ -260,10 +265,8 @@ function toArrayOfSiblings(nodes, diffIndex) {
 
     var type = lineToType(nodes[0]);
     for(var i=0; i < nodes.length; ) {
-        if(type === 'heading') var siblingsTo = ['heading', 'whitespace'];
-        if(type === 'list') var siblingsTo = ['whitespace'];
 
-        var indexToNextSibling = indexOfByTypes(nodes, siblingsTo, i+1);
+        var indexToNextSibling = indexOfByTypes(nodes, [type], i+1);
         winston.debug(type, indexToNextSibling, nodes[i]);
 
         if(indexToNextSibling === -1) {
@@ -277,7 +280,8 @@ function toArrayOfSiblings(nodes, diffIndex) {
 }
 
 function arrayOfSiblingsToNodes(arrayOfSiblings) {
-} end of conceptual code */
+}
+/* end of conceptual code */
 
 
 module.exports = {
